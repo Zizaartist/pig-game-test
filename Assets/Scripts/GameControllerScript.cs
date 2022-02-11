@@ -49,18 +49,6 @@ public class GameControllerScript : MonoBehaviour
         player.CanBeControlled = true;
     }
 
-    private void SpawnEnemies()
-    {
-        const int enemyCount = 5;
-        for(int i = 0; i < enemyCount; i++)
-        {
-            var initialPos = grid.ChooseEnemySpawningPoint();
-            // TO-DO add toWorld conversion
-            //var worldPos = Grid
-            var newEnemy = Instantiate(enemyPrefab, initialPos, Quaternion.identity);
-        }
-    }
-
     public enum GameState
     {
         startIdle,
