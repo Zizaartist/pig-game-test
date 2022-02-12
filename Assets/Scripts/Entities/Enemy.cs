@@ -1,16 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
-public class Enemy : Entity
+public class Enemy : Creature
 {
-    public Direction LookingDirection;
+    protected override float MoveTime => 3.0f;
 
-    public enum Direction 
+    public override void Collision(IWorldObject newObj)
     {
-        up,
-        down,
-        left,
-        right
+        switch(newObj)
+        {
+            case Player player: 
+                player.Remove();
+                break;
+            case Explosion explosion:
+                Remove();
+                break;
+            default: break;
+        }
     }
 }

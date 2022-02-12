@@ -5,7 +5,7 @@ using UnityEngine;
 public interface IWorldObject
 {
     /// <summary>
-    /// Уничтожает instance
+    /// Уничтожает экземпляр
     /// </summary>
     public void Remove();
 
@@ -13,5 +13,13 @@ public interface IWorldObject
     /// Изменяет id порядка сортировки
     /// </summary>
     public void Sort(int id);
-    
+
+    public void Collision(IWorldObject newObj);
+
+    /// <summary>
+    /// Занимает ли объект всю ячейку карты
+    /// </summary>
+    public bool OccupiesSpace { get; }
+
+    public Cell cell { get;  set; } //прощай инкапсуляция ;_;
 }

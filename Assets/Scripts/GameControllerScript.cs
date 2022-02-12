@@ -1,15 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class GameControllerScript : MonoBehaviour
 {
     public GameState gameState = GameState.startIdle;
-    public Player player;
-    public GameObject enemyContainer; // контейнер просто для чтобы не засорять иерархию
-    public GameObject enemyPrefab;
-    public List<Enemy> enemies = new List<Enemy>();
-    private Grid grid;
+
+    public UnityEvent GameStarted;
 
     public void StartGame()
     {
@@ -46,7 +44,7 @@ public class GameControllerScript : MonoBehaviour
     private void InitializeGame()
     {
         gameState = GameState.play;
-        player.CanBeControlled = true;
+        GameStarted.Invoke();
     }
 
     public enum GameState
