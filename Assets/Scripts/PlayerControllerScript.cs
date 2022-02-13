@@ -45,7 +45,7 @@ public class PlayerControllerScript : MonoBehaviour
         {
             if(CurrentPlayer?.CanMove ?? false)
             {
-                CurrentPlayer.Move(LastMemorizedMove ?? Direction.up);
+                CurrentPlayer.Move(LastMemorizedMove.Value);
                 LastMemorizedMove = null;
             }
         }

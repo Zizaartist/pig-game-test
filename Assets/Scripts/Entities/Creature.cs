@@ -7,7 +7,7 @@ public abstract class Creature : Entity
 {
     public List<Sprite> DirectionSprites; // каждый индекс соответствует int значениям Direction
     public UnityEvent<Direction> MoveEvent;
-    protected Dictionary<Direction, bool> currentView { get; private set; }
+    public Dictionary<Direction, bool> currentView { get; private set; }
 
     private Direction lookingDirection = Direction.down;
     private Direction LookingDirection
