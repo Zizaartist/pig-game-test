@@ -7,7 +7,7 @@ public class Player : Creature
 {
     public UnityEvent PlaceBombEvent;
 
-    protected override float MoveTime => 1.0f;
+    protected override float MoveTime => 0.6f;
 
     public override void Collision(IWorldObject newObj)
     {

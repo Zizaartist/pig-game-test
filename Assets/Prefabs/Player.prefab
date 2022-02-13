@@ -103,6 +103,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29a8680db9c66844a95a80da04ea8032, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DirectionSprites:
+  - {fileID: -1758962555, guid: 772f0efe689a86e48bcbc4c2a319e64c, type: 3}
+  - {fileID: -1243066349, guid: 772f0efe689a86e48bcbc4c2a319e64c, type: 3}
+  - {fileID: -228983740, guid: 772f0efe689a86e48bcbc4c2a319e64c, type: 3}
+  - {fileID: 1399374023, guid: 772f0efe689a86e48bcbc4c2a319e64c, type: 3}
+  MoveEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  PlaceBombEvent:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!223 &5408482219605164817
 Canvas:
   m_ObjectHideFlags: 0

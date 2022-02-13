@@ -5,10 +5,20 @@ using UnityEngine.Events;
 
 public abstract class Creature : Entity
 {
+    public List<Sprite> DirectionSprites; // каждый индекс соответствует int значениям Direction
     public UnityEvent<Direction> MoveEvent;
     protected Dictionary<Direction, bool> currentView { get; private set; }
 
-    private Direction LookingDirection = Direction.down;
+    private Direction lookingDirection = Direction.down;
+    private Direction LookingDirection
+    {
+        get => lookingDirection;
+        set
+        {
+            lookingDirection = value;
+            GetComponent<SpriteRenderer>().sprite = DirectionSprites[(int)lookingDirection];
+        }
+    }
     
     protected abstract float MoveTime { get; }
     public bool CanMove { get; private set; } = true;
@@ -24,8 +34,38 @@ public abstract class Creature : Entity
         if(CanMove)
         {
             CanMove = false;
+            LookingDirection = dir;
             MoveEvent.Invoke(dir);
             StartCoroutine(MoveTimer());
+        }
+    }
+
+    public void AnimateMovement(Vector3 dest)
+    {
+        var currPos = transform.position;
+        var distance = dest - currPos;
+        StartCoroutine(Animation(distance, dest));
+    }
+
+    private IEnumerator Animation(Vector3 distance, Vector3 dest)
+    {
+        var plannedDistanceLength = distance.magnitude;
+        var currentDistanceLength = 0f;
+        var IsMoving = true;
+        while (IsMoving)
+        {
+            yield return null;
+            var increment = distance * Time.deltaTime / MoveTime;
+            currentDistanceLength += increment.magnitude;
+            if(plannedDistanceLength >= currentDistanceLength)
+            {
+                transform.position += increment;
+            }
+            else
+            {
+                IsMoving = false;
+                transform.position = dest;
+            }
         }
     }
 }

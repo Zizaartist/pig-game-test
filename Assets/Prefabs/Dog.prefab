@@ -97,4 +97,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99b1eafa45dbb4748b9773fe28e02d8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LookingDirection: 0
+  DirectionSprites:
+  - {fileID: -857218478, guid: a028a9568580df9429673aae67dc1e5e, type: 3}
+  - {fileID: -1142498720, guid: a028a9568580df9429673aae67dc1e5e, type: 3}
+  - {fileID: 1388919588, guid: a028a9568580df9429673aae67dc1e5e, type: 3}
+  - {fileID: -264305364, guid: a028a9568580df9429673aae67dc1e5e, type: 3}
+  MoveEvent:
+    m_PersistentCalls:
+      m_Calls: []

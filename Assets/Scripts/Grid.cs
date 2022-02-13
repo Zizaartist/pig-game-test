@@ -156,6 +156,8 @@ public class Grid : MonoBehaviour
         {
             GridArray[currentPos.x, currentPos.y].Remove(creature);
             GridArray[newPos.x, newPos.y].Add(creature);
+            var worldDestinationPos = GetWorldPosFromCellPos(newPos) + cellOffset;
+            creature.AnimateMovement(worldDestinationPos);
         }
     }
 

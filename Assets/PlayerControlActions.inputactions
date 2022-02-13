@@ -1,0 +1,34 @@
+{
+    "name": "PlayerControlActions",
+    "maps": [
+        {
+            "name": "Movement",
+            "id": "c4c47573-9986-459b-90f4-e1461025e383",
+            "actions": [
+                {
+                    "name": "Move",
+                    "type": "Value",
+                    "id": "deae3bac-9e34-4744-a1b4-d59941b5f867",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "Hold",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "89a4b681-5015-43fb-aab8-b7da5a45961d",
+                    "path": "<Gamepad>/dpad",
+                    "interactions": "Hold",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
