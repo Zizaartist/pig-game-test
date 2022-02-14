@@ -24,7 +24,8 @@ public class PlayerControllerScript : MonoBehaviour
 
     private void ProcessInputs()
     {
-        var val = controllerInput.Movement.Move.ReadValue<Vector2>();
+        //var val = controllerInput.Movement.Move.ReadValue<Vector2>();
+        //if(val != Vector2.zero) Debug.Log($"Dpad: {val}");
         // if(Input.GetKey(KeyCode.W))
         // {
         //     LastMemorizedMove = Direction.up;

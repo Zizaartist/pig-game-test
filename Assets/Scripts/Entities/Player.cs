@@ -6,6 +6,7 @@ using UnityEngine.Events;
 public class Player : Creature
 {
     public UnityEvent PlaceBombEvent;
+    public UnityEvent PlayerDied;
 
     protected override float MoveTime => 0.6f;
 
@@ -21,6 +22,13 @@ public class Player : Creature
                 break;
             default: break;
         }
+    }
+    
+    public override void Remove()
+    {
+        PlayerDied.Invoke();
+        PlayerDied.RemoveAllListeners();
+        base.Remove();
     }
 
     public void PlaceBomb() => PlaceBombEvent.Invoke();

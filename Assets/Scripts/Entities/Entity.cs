@@ -10,7 +10,7 @@ public abstract class Entity : MonoBehaviour, IWorldObject
 
     public abstract void Collision(IWorldObject newObj);
 
-    public void Remove() 
+    public virtual void Remove() 
     {
         cell.Remove(this);
         Destroy(this);

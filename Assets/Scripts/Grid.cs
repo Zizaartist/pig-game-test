@@ -64,6 +64,7 @@ public class Grid : MonoBehaviour
         var newPlayer = Instantiate(PlayerPrefab, GetWorldPosFromCellPos(PlayerSpawnPoint) + cellOffset, Quaternion.identity);
         GridArray[PlayerSpawnPoint.x, PlayerSpawnPoint.y].Add(newPlayer);
         newPlayer.MoveEvent.AddListener((dir) => MoveCreature(dir, newPlayer));
+        UpdateCreatureVision(newPlayer);
         return newPlayer;
     }
 
@@ -84,6 +85,8 @@ public class Grid : MonoBehaviour
             var newEnemy = Instantiate(EnemyPrefab, GetWorldPosFromCellPos(randomCell.Item2.x, randomCell.Item2.y) + cellOffset, Quaternion.identity);
             randomCell.Item1.Add(newEnemy);
             newEnemy.transform.SetParent(transform);
+            newEnemy.MoveEvent.AddListener(dir => MoveCreature(dir, newEnemy));
+            UpdateCreatureVision(newEnemy);
 
             unoccupiedCells.Remove(randomCell);
         }
@@ -157,8 +160,25 @@ public class Grid : MonoBehaviour
             GridArray[currentPos.x, currentPos.y].Remove(creature);
             GridArray[newPos.x, newPos.y].Add(creature);
             var worldDestinationPos = GetWorldPosFromCellPos(newPos) + cellOffset;
+            UpdateCreatureVision(creature);
             creature.AnimateMovement(worldDestinationPos);
         }
+    }
+
+    private void UpdateCreatureVision(Creature creature)
+    {
+        var creatureVision = new Dictionary<Direction, bool>();
+
+        var upCoords = creature.cell.Position + DirectionToVector(Direction.up);
+        creatureVision.Add(Direction.up, (IsWithinBoundaries(upCoords) && !GridArray[upCoords.x, upCoords.y].IsOccupied));
+        var downCoords = creature.cell.Position + DirectionToVector(Direction.down);
+        creatureVision.Add(Direction.down, (IsWithinBoundaries(downCoords) && !GridArray[downCoords.x, downCoords.y].IsOccupied));
+        var leftCoords = creature.cell.Position + DirectionToVector(Direction.left);
+        creatureVision.Add(Direction.left, (IsWithinBoundaries(leftCoords) && !GridArray[leftCoords.x, leftCoords.y].IsOccupied));
+        var rightCoords = creature.cell.Position + DirectionToVector(Direction.right);
+        creatureVision.Add(Direction.right, (IsWithinBoundaries(rightCoords) && !GridArray[rightCoords.x, rightCoords.y].IsOccupied));
+
+        creature.currentVision = creatureVision;
     }
 
     /// <summary>

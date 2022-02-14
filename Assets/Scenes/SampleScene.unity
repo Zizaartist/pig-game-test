@@ -535,7 +535,7 @@ MonoBehaviour:
   Width: 17
   Height: 9
   BushCount: 10
-  EnemyCount: 5
+  EnemyCount: 1
   PlayerSpawnPoint: {x: 0, y: 0}
 --- !u!1 &981775216
 GameObject:
