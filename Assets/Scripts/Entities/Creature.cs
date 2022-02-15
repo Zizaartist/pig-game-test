@@ -35,9 +35,15 @@ public abstract class Creature : Entity
         {
             CanMove = false;
             LookingDirection = dir;
-            MoveEvent.Invoke(dir);
+            MoveEvent?.Invoke(dir);
             StartCoroutine(MoveTimer());
         }
+    }
+
+    public override void Remove() 
+    {
+        MoveEvent.RemoveAllListeners();
+        base.Remove();
     }
 
     public void AnimateMovement(Vector3 dest)

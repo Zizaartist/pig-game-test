@@ -13,7 +13,8 @@ public abstract class Entity : MonoBehaviour, IWorldObject
     public virtual void Remove() 
     {
         cell.Remove(this);
-        Destroy(this);
+        Debug.Log($"Destroyed - {this.GetType()}");
+        Destroy(gameObject);
     }
 
     public void Sort(int id) => this.gameObject.GetComponent<SpriteRenderer>().sortingOrder = id;

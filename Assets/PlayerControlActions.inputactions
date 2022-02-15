@@ -11,16 +11,16 @@
                     "id": "deae3bac-9e34-4744-a1b4-d59941b5f867",
                     "expectedControlType": "Vector2",
                     "processors": "",
-                    "interactions": "Hold",
-                    "initialStateCheck": false
+                    "interactions": "",
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
                 {
                     "name": "",
-                    "id": "89a4b681-5015-43fb-aab8-b7da5a45961d",
-                    "path": "<Gamepad>/dpad",
-                    "interactions": "Hold",
+                    "id": "bfebb1c3-6a4e-4dc1-aac0-a77ddfeb6314",
+                    "path": "<Gamepad>/leftStick",
+                    "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Move",

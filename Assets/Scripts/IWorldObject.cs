@@ -20,6 +20,7 @@ public interface IWorldObject
     /// Занимает ли объект всю ячейку карты
     /// </summary>
     public bool OccupiesSpace { get; }
+    //public bool MarkedForDestruction { get; }
 
     public Cell cell { get;  set; } //прощай инкапсуляция ;_;
 }

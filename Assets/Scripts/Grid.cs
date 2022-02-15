@@ -19,6 +19,7 @@ public class Grid : MonoBehaviour
     public GridLayout grid;
 
     public UnityEvent<Player> FinishedInitialization;
+    public UnityEvent PlayerDeath;
 
     private Cell[,] GridArray;
     private Vector3 cellOffset;
@@ -33,7 +34,9 @@ public class Grid : MonoBehaviour
 
     public void Initialize()
     {
+        Debug.Log("Starting initialization");
         GridArray = new Cell[Width, Height];
+        //ClearGrid();
         for(int row = 0; row < Height; row++)
         {
             for(int column = 0; column < Width; column++)
@@ -44,19 +47,32 @@ public class Grid : MonoBehaviour
         }
         cellOffset = grid.cellSize * .5f;
 
-        ClearGrid();
         SpawnStones();
         var newPlayer = SpawnPlayer();
         SpawnBushes();
         SpawnEnemies();
 
         FinishedInitialization.Invoke(newPlayer);
+        Debug.Log("Finished initialization");
     }
 
     private void ClearGrid()
     {
-        foreach(var cell in GridArray)
-            cell.Clear();
+        Debug.Log("Starting clearing grid");
+        if(GridArray[0,0] != null)
+        {
+            for(int row = 1; row < Height; row += 2) // Ставить камни на четных рядах
+            {
+                for(int column = 1; column < Width; column += 2) // Ставить камни на четных колоннах
+                {
+                    GridArray[column, row].Clear();
+                }
+            }
+        }
+        
+        // foreach(var cell in GridArray)
+        //     cell.Clear();
+        Debug.Log("Finished clearing grid");
     }
 
     private Player SpawnPlayer()
@@ -64,7 +80,10 @@ public class Grid : MonoBehaviour
         var newPlayer = Instantiate(PlayerPrefab, GetWorldPosFromCellPos(PlayerSpawnPoint) + cellOffset, Quaternion.identity);
         GridArray[PlayerSpawnPoint.x, PlayerSpawnPoint.y].Add(newPlayer);
         newPlayer.MoveEvent.AddListener((dir) => MoveCreature(dir, newPlayer));
+        newPlayer.PlayerDied.AddListener(() => PlayerDeath.Invoke());
+        Debug.Log("Pre-vision");
         UpdateCreatureVision(newPlayer);
+        Debug.Log("Post-vision");
         return newPlayer;
     }
 
@@ -168,7 +187,7 @@ public class Grid : MonoBehaviour
     private void UpdateCreatureVision(Creature creature)
     {
         var creatureVision = new Dictionary<Direction, bool>();
-
+        
         var upCoords = creature.cell.Position + DirectionToVector(Direction.up);
         creatureVision.Add(Direction.up, (IsWithinBoundaries(upCoords) && !GridArray[upCoords.x, upCoords.y].IsOccupied));
         var downCoords = creature.cell.Position + DirectionToVector(Direction.down);

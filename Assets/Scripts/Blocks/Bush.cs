@@ -11,4 +11,10 @@ public class Bush : Block
             Remove();
         }
     }
+
+    public override void Remove() 
+    {
+        base.Remove();
+        Destroy(this);
+    }
 }

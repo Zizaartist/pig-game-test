@@ -28,6 +28,7 @@ public class Player : Creature
     {
         PlayerDied.Invoke();
         PlayerDied.RemoveAllListeners();
+        PlaceBombEvent.RemoveAllListeners();
         base.Remove();
     }
 

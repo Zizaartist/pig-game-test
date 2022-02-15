@@ -44,7 +44,12 @@ public class Cell
 
     public void Clear() 
     {
-        storedObjects.ForEach(wo => wo.cell = null);
+        if(storedObjects.Any()) Debug.Log($"Pos: {Position}; objs: {storedObjects.Count()}");
+        //storedObjects.ForEach(wo => wo.Remove());
+        foreach (var wo in storedObjects)
+        {
+            wo.Remove();
+        }
         storedObjects.Clear();
         IsOccupied = false;
     }
