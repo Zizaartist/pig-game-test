@@ -13,7 +13,8 @@ public class Grid : MonoBehaviour
 {
     public Stone StonePrefab;
     public Bush BushPrefab;
-    public Enemy EnemyPrefab;
+    public Enemy DogPrefab;
+    public Enemy FarmerPrefab;
     public Bomb BombPrefab;
     public Explosion ExplosionPrefab;
     public Player PlayerPrefab;
@@ -21,7 +22,8 @@ public class Grid : MonoBehaviour
 
     public UnityEvent<Player> FinishedInitialization;
     public UnityEvent PlayerDeath;
-    public UnityEvent<bool> ToggleAIs;
+    public UnityEvent VictoryEvent;
+    public UnityEvent<int, int> UpdateScore;
 
     private Cell[,] GridArray;
     private Vector3 cellOffset;
@@ -31,11 +33,29 @@ public class Grid : MonoBehaviour
     [Range(2, 100)]
     public int Height = 9;
     public int BushCount = 10;
-    public int EnemyCount = 5;
+    public int DogCount = 3;
+    public int FarmerCount = 2;
     public Vector2Int PlayerSpawnPoint = new Vector2Int(0, 0);
+    public int TotalEnemies => DogCount + FarmerCount;
+    private int enemiesDefeated;
+    public int EnemiesDefeated
+    {
+        get => enemiesDefeated;
+        set
+        {
+            UpdateScore.Invoke(value, TotalEnemies);
+            if(enemiesDefeated == value) return;
+            enemiesDefeated = value;
+            if(enemiesDefeated >= TotalEnemies)
+            {
+                VictoryEvent.Invoke();
+            }
+        }
+    }
 
     public void Initialize()
     {
+        EnemiesDefeated = 0;
         Debug.Log("Starting initialization");
         if(GridArray == null)
         {
@@ -48,16 +68,8 @@ public class Grid : MonoBehaviour
         SpawnBushes();
         SpawnEnemies();
 
-        ToggleAIs.Invoke(true);
         FinishedInitialization.Invoke(newPlayer);
         Debug.Log("Finished initialization");
-    }
-
-    // Меры очистки при завершении игры
-    public void Cleanup()
-    {
-        ToggleAIs.Invoke(false);
-        ToggleAIs.RemoveAllListeners();
     }
 
     private void FillGridWithCells()
@@ -74,12 +86,7 @@ public class Grid : MonoBehaviour
         cellOffset = grid.cellSize * .5f;
     }
 
-    private void ClearGrid()
-    {
-        Debug.Log("Starting clearing grid");
-        ApplyToAllCells(cell => cell.Clear());
-        Debug.Log("Finished clearing grid");
-    }
+    private void ClearGrid() => ApplyToAllCells(cell => cell.Clear());
 
     private Player SpawnPlayer()
     {
@@ -87,10 +94,8 @@ public class Grid : MonoBehaviour
         GridArray[PlayerSpawnPoint.x, PlayerSpawnPoint.y].Add(newPlayer);
         newPlayer.MoveEvent.AddListener((dir) => MoveCreature(dir, newPlayer));
         newPlayer.PlayerDied.AddListener(() => PlayerDeath.Invoke());
-        Debug.Log("Pre-vision");
-        Debug.Log(GridArray[PlayerSpawnPoint.x, PlayerSpawnPoint.y].IsOccupied);
+        newPlayer.PlaceBombEvent.AddListener(() => SpawnBombUnderPlayer(newPlayer));
         UpdateCreatureVision(newPlayer);
-        Debug.Log("Post-vision");
         return newPlayer;
     }
 
@@ -100,23 +105,26 @@ public class Grid : MonoBehaviour
     {
         var unoccupiedCells = GetListOfUnoccupiedCells();
 
-        if(unoccupiedCells.Count() < EnemyCount)
-            throw new System.NotImplementedException();
-
-        for(int i = 0; i < EnemyCount; i++)
+        Action<Enemy> SpawnEnemiesOfPrefabType = (prefab) => 
         {
             var randomIndex = (int)(UnityEngine.Random.value * unoccupiedCells.Count());
             var randomCell = unoccupiedCells[randomIndex];
 
-            var newEnemy = Instantiate(EnemyPrefab, GetWorldPosFromCellPos(randomCell.Item2.x, randomCell.Item2.y) + cellOffset, Quaternion.identity);
+            var newEnemy = Instantiate(prefab, GetWorldPosFromCellPos(randomCell.Item2.x, randomCell.Item2.y) + cellOffset, Quaternion.identity);
             randomCell.Item1.Add(newEnemy);
             newEnemy.transform.SetParent(transform);
             newEnemy.MoveEvent.AddListener(dir => MoveCreature(dir, newEnemy));
-            ToggleAIs.AddListener(state => newEnemy.GetComponent<CreatureAI>().IsActive = state);
+            newEnemy.GotDirty.AddListener(() => EnemiesDefeated++);
             UpdateCreatureVision(newEnemy);
-
+            
             unoccupiedCells.Remove(randomCell);
-        }
+        };
+
+        for(int i = 0; i < DogCount; i++)
+            SpawnEnemiesOfPrefabType(DogPrefab);
+
+        for(int i = 0; i < FarmerCount; i++)
+            SpawnEnemiesOfPrefabType(FarmerPrefab);
     }
 
     private void SpawnStones()
@@ -157,20 +165,19 @@ public class Grid : MonoBehaviour
     {
         var playerPos = player.cell.Position;
         var newBomb = Instantiate(BombPrefab, GetWorldPosFromCellPos(playerPos) + cellOffset, Quaternion.identity);
-        if(GridArray[playerPos.x, playerPos.y].Add(newBomb))
-        {
-            newBomb.Exploded.AddListener(Explosion);
-        }
-        else
-        {
-            newBomb.Remove();
-        }
+        GridArray[playerPos.x, playerPos.y].Add(newBomb);
+        newBomb.Exploded.AddListener(Explosion);
     }
 
     private void Explosion(Vector2Int position)
     {
-        var potentialPositions = GetOccupationAround(position);
-        foreach(var explPos in potentialPositions.Where(pos => !pos.Value).Select(pos => pos.Key))
+        var potentialPositions = GetExplosionPoints(position)
+            .Where(pair => pair.Value)
+            .Select(pair => pair.Key)
+            .ToList();
+        potentialPositions.Add(position);
+
+        foreach(var explPos in potentialPositions)
         {
             var newExplosionPart = Instantiate(ExplosionPrefab, GetWorldPosFromCellPos(explPos) + cellOffset, Quaternion.identity);
             GridArray[explPos.x, explPos.y].Add(newExplosionPart);
@@ -209,28 +216,29 @@ public class Grid : MonoBehaviour
         creature.currentVision = creatureVision;
     }
 
-    /// <summary>
-    /// Получаем занятость соседних клеток
-    /// </summary>
-    public Dictionary<Vector2Int, bool> GetOccupationAround(Vector2Int centerPos)
+    public Dictionary<Vector2Int, bool> GetExplosionPoints(Vector2Int centerPos)
     {
         var result = new Dictionary<Vector2Int, bool>();
 
-        var up = new Vector2Int(centerPos.x, centerPos.y + 1);
-        var isUpOccupied = !IsWithinBoundaries(up) || GridArray[up.x, up.y].IsOccupied;
-        result.Add(up, isUpOccupied);
-        
-        var down = new Vector2Int(centerPos.x, centerPos.y - 1);
-        var isDownOccupied = !IsWithinBoundaries(down) || GridArray[down.x, down.y].IsOccupied;
-        result.Add(down, isDownOccupied);
-        
-        var left = new Vector2Int(centerPos.x - 1, centerPos.y);
-        var isLeftOccupied = !IsWithinBoundaries(left) || GridArray[left.x, left.y].IsOccupied;
-        result.Add(left, isLeftOccupied);
-        
-        var right = new Vector2Int(centerPos.x + 1, centerPos.y);
-        var isRightOccupied = !IsWithinBoundaries(right) || GridArray[right.x, right.y].IsOccupied;
-        result.Add(right, isRightOccupied);
+        var points = new (Vector2Int, Vector2Int)[]
+        {
+            (centerPos + new Vector2Int(0,1), centerPos + new Vector2Int(0,2)),
+            (centerPos + new Vector2Int(0,-1), centerPos + new Vector2Int(0,-2)),
+            (centerPos + new Vector2Int(1,0), centerPos + new Vector2Int(2,0)),
+            (centerPos + new Vector2Int(-1,0), centerPos + new Vector2Int(-2,0)),
+        };
+
+        foreach(var pointPair in points)
+        {
+            var isPoint1Valid = IsWithinBoundaries(pointPair.Item1);
+            var isPoint2Valid = false;
+
+            if(isPoint1Valid) 
+                isPoint2Valid = IsWithinBoundaries(pointPair.Item2);
+            
+            result.Add(pointPair.Item1, isPoint1Valid);
+            result.Add(pointPair.Item2, isPoint2Valid);
+        }
 
         return result;
     }

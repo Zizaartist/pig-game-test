@@ -15,21 +15,21 @@ public class Cell
     /// <returns>Успешность операции</returns>
     public bool Add(IWorldObject newWorldObject)
     {
-        if(!IsOccupied)
-        {
-            var storedObjectsBefore = storedObjects.ToList();
-            storedObjects.Add(newWorldObject);
-            newWorldObject.cell = this;
-            newWorldObject.Sort(SortId);
+        // if(!IsOccupied)
+        // {
+        var storedObjectsBefore = storedObjects.ToList();
+        storedObjects.Add(newWorldObject);
+        newWorldObject.cell = this;
+        newWorldObject.Sort(SortId);
 
-            IsOccupied = newWorldObject.OccupiesSpace;
+        IsOccupied = newWorldObject.OccupiesSpace;
 
-            if(storedObjectsBefore.Any())
-                storedObjectsBefore.ForEach(wo => wo.Collision(newWorldObject));
+        if(storedObjectsBefore.Any())
+            storedObjectsBefore.ForEach(wo => wo.Collision(newWorldObject));
 
-            return true;
-        }
-        return false;
+        return true;
+        // }
+        // return false;
     }
 
     /// <summary>
@@ -44,7 +44,6 @@ public class Cell
 
     public void Clear()
     {
-        if(storedObjects.Any()) Debug.Log($"Pos: {Position}; objs: {storedObjects.Count()}");
         storedObjects.ToList().ForEach(wo => wo.Remove());
         IsOccupied = false;
     }

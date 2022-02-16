@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Explosion : Entity
 {
-    private const float Lifetime = 1.0f;
+    private const float Lifetime = 1.5f;
 
     private void Start() {
         StartCoroutine(ExplosionTimer());   
@@ -15,10 +15,10 @@ public class Explosion : Entity
         switch(newObj)
         {
             case Player player:
-                player.Remove();
+                player.IsDirty = true;
                 break;
             case Enemy enemy:
-                enemy.Remove();
+                enemy.IsDirty = true;
                 break;
             default: break;
         }

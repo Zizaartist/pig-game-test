@@ -21,8 +21,5 @@ public class Bomb : Entity
         Remove();
     }
 
-    public override void Collision(IWorldObject newObj)
-    {
-        throw new System.NotImplementedException();
-    }
+    public override void Collision(IWorldObject newObj) {}
 }

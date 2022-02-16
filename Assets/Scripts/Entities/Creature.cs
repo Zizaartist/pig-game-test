@@ -6,7 +6,9 @@ using UnityEngine.Events;
 public abstract class Creature : Entity
 {
     public List<Sprite> DirectionSprites; // каждый индекс соответствует int значениям Direction
+    public List<Sprite> DirtyDirectionSprites;
     public UnityEvent<Direction> MoveEvent;
+    public UnityEvent GotDirty;
     public Dictionary<Direction, bool> currentVision { get; set; }
 
     private Direction lookingDirection = Direction.down;
@@ -16,16 +18,35 @@ public abstract class Creature : Entity
         set
         {
             lookingDirection = value;
-            GetComponent<SpriteRenderer>().sprite = DirectionSprites[(int)lookingDirection];
+            UpdateSprite();
         }
     }
     
     protected abstract float MoveTime { get; }
     public bool CanMove { get; private set; } = true;
+    private bool isDirty;
+    public bool IsDirty 
+    {
+        get => isDirty;
+        set
+        {
+            if(isDirty == value) return;
+            isDirty = value;
+            UpdateSprite();
+            if(isDirty) GotDirty.Invoke();
+        }
+    }
+    private const float DirtCoef = 2.0f;
+
+    private void UpdateSprite()
+    {
+        GetComponent<SpriteRenderer>().sprite = IsDirty ? DirtyDirectionSprites[(int)lookingDirection] : 
+                                                          DirectionSprites[(int)lookingDirection];
+    }
 
     private IEnumerator MoveTimer() 
     { 
-        yield return new WaitForSeconds(MoveTime); 
+        yield return new WaitForSeconds(MoveTime * (IsDirty ? DirtCoef : 1f)); 
         CanMove = true;
     }
 
@@ -43,6 +64,7 @@ public abstract class Creature : Entity
     public override void Remove() 
     {
         MoveEvent.RemoveAllListeners();
+        GotDirty.RemoveAllListeners();
         base.Remove();
     }
 
@@ -61,7 +83,7 @@ public abstract class Creature : Entity
         while (IsMoving)
         {
             yield return null;
-            var increment = distance * Time.deltaTime / MoveTime;
+            var increment = distance * Time.deltaTime / MoveTime / (IsDirty ? DirtCoef : 1f);
             currentDistanceLength += increment.magnitude;
             if(plannedDistanceLength >= currentDistanceLength)
             {

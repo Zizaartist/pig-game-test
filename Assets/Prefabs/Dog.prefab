@@ -103,6 +103,11 @@ MonoBehaviour:
   - {fileID: -1142498720, guid: a028a9568580df9429673aae67dc1e5e, type: 3}
   - {fileID: 1388919588, guid: a028a9568580df9429673aae67dc1e5e, type: 3}
   - {fileID: -264305364, guid: a028a9568580df9429673aae67dc1e5e, type: 3}
+  DirtyDirectionSprites:
+  - {fileID: 141765066, guid: d74809c8ea92cfd49b75dab2f5e29162, type: 3}
+  - {fileID: -627909929, guid: d74809c8ea92cfd49b75dab2f5e29162, type: 3}
+  - {fileID: -1252810798, guid: d74809c8ea92cfd49b75dab2f5e29162, type: 3}
+  - {fileID: 1881180565, guid: d74809c8ea92cfd49b75dab2f5e29162, type: 3}
   MoveEvent:
     m_PersistentCalls:
       m_Calls: []

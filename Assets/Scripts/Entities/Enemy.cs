@@ -15,7 +15,7 @@ public class Enemy : Creature
                 player.Remove();
                 break;
             case Explosion explosion:
-                Remove();
+                IsDirty = true;
                 break;
             default: break;
         }

@@ -65,8 +65,5 @@ public class PlayerControllerScript : MonoBehaviour
         }
     }
 
-    public void PlaceBomb()
-    {
-        grid.SpawnBombUnderPlayer(CurrentPlayer);
-    }
+    public void PlaceBomb() => CurrentPlayer?.PlaceBomb();
 }

@@ -9,6 +9,11 @@ public class Player : Creature
     public UnityEvent PlayerDied;
 
     protected override float MoveTime => 0.6f;
+    private const float DirtDebuffDuration = 3.0f;
+
+    private void Awake() {
+        GotDirty.AddListener(() => StartCoroutine(DirtDebuffCooldown()));
+    }
 
     public override void Collision(IWorldObject newObj)
     {
@@ -18,11 +23,18 @@ public class Player : Creature
                 Remove();
                 break;
             case Explosion explosion:
-                Remove();
+                IsDirty = true;
                 break;
             default: break;
         }
     }
+
+    private IEnumerator DirtDebuffCooldown()
+    {
+        yield return new WaitForSeconds(DirtDebuffDuration);
+        IsDirty = false;
+    }
+
     
     public override void Remove()
     {
