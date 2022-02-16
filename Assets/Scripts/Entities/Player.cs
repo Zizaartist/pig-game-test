@@ -7,9 +7,12 @@ public class Player : Creature
 {
     public UnityEvent PlaceBombEvent;
     public UnityEvent PlayerDied;
+    public UnityEvent<bool> BombIsAvailable;
 
     protected override float MoveTime => 0.6f;
+    private bool CanUseBombs = true;
     private const float DirtDebuffDuration = 3.0f;
+    private const float BombCooldownTime = 3.0f;
 
     private void Awake() {
         GotDirty.AddListener(() => StartCoroutine(DirtDebuffCooldown()));
@@ -35,14 +38,30 @@ public class Player : Creature
         IsDirty = false;
     }
 
+    private IEnumerator BombCooldown()
+    {
+        yield return new WaitForSeconds(BombCooldownTime);
+        CanUseBombs = true;
+        BombIsAvailable.Invoke(CanUseBombs);
+    }
     
     public override void Remove()
     {
         PlayerDied.Invoke();
         PlayerDied.RemoveAllListeners();
         PlaceBombEvent.RemoveAllListeners();
+        BombIsAvailable.RemoveAllListeners();
         base.Remove();
     }
 
-    public void PlaceBomb() => PlaceBombEvent.Invoke();
+    public void PlaceBomb() 
+    {
+        if(CanUseBombs) 
+        {
+            CanUseBombs = false;
+            BombIsAvailable.Invoke(CanUseBombs);
+            StartCoroutine(BombCooldown());
+            PlaceBombEvent.Invoke();
+        }
+    } 
 }

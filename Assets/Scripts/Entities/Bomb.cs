@@ -5,7 +5,6 @@ using UnityEngine.Events;
 
 public class Bomb : Entity
 {
-    public override bool OccupiesSpace => true;
     private const float Lifetime = 2.0f;
     public UnityEvent<Vector2Int> Exploded;
 

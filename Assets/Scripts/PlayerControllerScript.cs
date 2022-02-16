@@ -7,16 +7,28 @@ using UnityEngine.InputSystem.Controls;
 [RequireComponent(typeof(PlayerInput))]
 public class PlayerControllerScript : MonoBehaviour
 {
-    public Player CurrentPlayer { get; set; }
+    private Player currentPlayer;
+    public Player CurrentPlayer
+    {
+        get => currentPlayer;
+        set
+        {
+            currentPlayer = value;
+            if(currentPlayer != null)
+                currentPlayer.BombIsAvailable.AddListener(state => BombIndicator.gameObject.SetActive(state));
+        }
+    }
     private Grid grid;
     private Direction? LastMemorizedMove;
     public PlayerInput input;
+    public GameObject BombIndicator;
 
     // Update is called once per frame
     void Update()
     {
         if(CurrentPlayer != null)
         {
+
             ProcessInputs();
         }
     }
