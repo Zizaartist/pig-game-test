@@ -7,6 +7,7 @@ using System.Linq;
 public class GameControllerScript : MonoBehaviour
 {
     public UnityEvent GameStarted;
+    public UnityEvent GameFinished;
     public GameState gameState = GameState.startIdle;
 
     public GameObject startView;
@@ -47,6 +48,7 @@ public class GameControllerScript : MonoBehaviour
             currentView.SetActive(false);
             currentView = gameOverView;
             currentView.SetActive(true);
+            GameFinished.Invoke();
         }
     }
 
@@ -58,6 +60,7 @@ public class GameControllerScript : MonoBehaviour
             currentView.SetActive(false);
             currentView = victoryView;
             currentView.SetActive(true);
+            GameFinished.Invoke();
         }
     }
 

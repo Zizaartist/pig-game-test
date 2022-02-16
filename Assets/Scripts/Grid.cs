@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using UnityEngine.Events;
+using System;
 
 /// <summary>
 /// Предоставляет методы управления игровым пространством. 
@@ -20,6 +21,7 @@ public class Grid : MonoBehaviour
 
     public UnityEvent<Player> FinishedInitialization;
     public UnityEvent PlayerDeath;
+    public UnityEvent<bool> ToggleAIs;
 
     private Cell[,] GridArray;
     private Vector3 cellOffset;
@@ -35,8 +37,32 @@ public class Grid : MonoBehaviour
     public void Initialize()
     {
         Debug.Log("Starting initialization");
+        if(GridArray == null)
+        {
+            FillGridWithCells();
+        }
+
+        ClearGrid();
+        SpawnStones();
+        var newPlayer = SpawnPlayer();
+        SpawnBushes();
+        SpawnEnemies();
+
+        ToggleAIs.Invoke(true);
+        FinishedInitialization.Invoke(newPlayer);
+        Debug.Log("Finished initialization");
+    }
+
+    // Меры очистки при завершении игры
+    public void Cleanup()
+    {
+        ToggleAIs.Invoke(false);
+        ToggleAIs.RemoveAllListeners();
+    }
+
+    private void FillGridWithCells()
+    {
         GridArray = new Cell[Width, Height];
-        //ClearGrid();
         for(int row = 0; row < Height; row++)
         {
             for(int column = 0; column < Width; column++)
@@ -46,32 +72,12 @@ public class Grid : MonoBehaviour
             }
         }
         cellOffset = grid.cellSize * .5f;
-
-        SpawnStones();
-        var newPlayer = SpawnPlayer();
-        SpawnBushes();
-        SpawnEnemies();
-
-        FinishedInitialization.Invoke(newPlayer);
-        Debug.Log("Finished initialization");
     }
 
     private void ClearGrid()
     {
         Debug.Log("Starting clearing grid");
-        if(GridArray[0,0] != null)
-        {
-            for(int row = 1; row < Height; row += 2) // Ставить камни на четных рядах
-            {
-                for(int column = 1; column < Width; column += 2) // Ставить камни на четных колоннах
-                {
-                    GridArray[column, row].Clear();
-                }
-            }
-        }
-        
-        // foreach(var cell in GridArray)
-        //     cell.Clear();
+        ApplyToAllCells(cell => cell.Clear());
         Debug.Log("Finished clearing grid");
     }
 
@@ -82,6 +88,7 @@ public class Grid : MonoBehaviour
         newPlayer.MoveEvent.AddListener((dir) => MoveCreature(dir, newPlayer));
         newPlayer.PlayerDied.AddListener(() => PlayerDeath.Invoke());
         Debug.Log("Pre-vision");
+        Debug.Log(GridArray[PlayerSpawnPoint.x, PlayerSpawnPoint.y].IsOccupied);
         UpdateCreatureVision(newPlayer);
         Debug.Log("Post-vision");
         return newPlayer;
@@ -98,13 +105,14 @@ public class Grid : MonoBehaviour
 
         for(int i = 0; i < EnemyCount; i++)
         {
-            var randomIndex = (int)(Random.value * unoccupiedCells.Count());
+            var randomIndex = (int)(UnityEngine.Random.value * unoccupiedCells.Count());
             var randomCell = unoccupiedCells[randomIndex];
 
             var newEnemy = Instantiate(EnemyPrefab, GetWorldPosFromCellPos(randomCell.Item2.x, randomCell.Item2.y) + cellOffset, Quaternion.identity);
             randomCell.Item1.Add(newEnemy);
             newEnemy.transform.SetParent(transform);
             newEnemy.MoveEvent.AddListener(dir => MoveCreature(dir, newEnemy));
+            ToggleAIs.AddListener(state => newEnemy.GetComponent<CreatureAI>().IsActive = state);
             UpdateCreatureVision(newEnemy);
 
             unoccupiedCells.Remove(randomCell);
@@ -134,7 +142,7 @@ public class Grid : MonoBehaviour
 
         for(int i = 0; i < BushCount; i++)
         {
-            var randomIndex = (int)(Random.value * unoccupiedCells.Count());
+            var randomIndex = (int)(UnityEngine.Random.value * unoccupiedCells.Count());
             var randomCell = unoccupiedCells[randomIndex];
 
             var newBush = Instantiate(BushPrefab, GetWorldPosFromCellPos(randomCell.Item2.x, randomCell.Item2.y) + cellOffset, Quaternion.identity);
@@ -188,13 +196,14 @@ public class Grid : MonoBehaviour
     {
         var creatureVision = new Dictionary<Direction, bool>();
         
-        var upCoords = creature.cell.Position + DirectionToVector(Direction.up);
+        // TO-DO исправить костыльные проверки cell 
+        var upCoords = (creature.cell?.Position ?? Vector2Int.zero) + DirectionToVector(Direction.up);
         creatureVision.Add(Direction.up, (IsWithinBoundaries(upCoords) && !GridArray[upCoords.x, upCoords.y].IsOccupied));
-        var downCoords = creature.cell.Position + DirectionToVector(Direction.down);
+        var downCoords = (creature.cell?.Position ?? Vector2Int.zero) + DirectionToVector(Direction.down);
         creatureVision.Add(Direction.down, (IsWithinBoundaries(downCoords) && !GridArray[downCoords.x, downCoords.y].IsOccupied));
-        var leftCoords = creature.cell.Position + DirectionToVector(Direction.left);
+        var leftCoords = (creature.cell?.Position ?? Vector2Int.zero) + DirectionToVector(Direction.left);
         creatureVision.Add(Direction.left, (IsWithinBoundaries(leftCoords) && !GridArray[leftCoords.x, leftCoords.y].IsOccupied));
-        var rightCoords = creature.cell.Position + DirectionToVector(Direction.right);
+        var rightCoords = (creature.cell?.Position ?? Vector2Int.zero) + DirectionToVector(Direction.right);
         creatureVision.Add(Direction.right, (IsWithinBoundaries(rightCoords) && !GridArray[rightCoords.x, rightCoords.y].IsOccupied));
 
         creature.currentVision = creatureVision;
@@ -229,25 +238,35 @@ public class Grid : MonoBehaviour
     /// <summary>
     /// Находится ли координата внутри границ grid-а
     /// </summary>
-    public bool IsWithinBoundaries(Vector2Int position) => (position.x >= 0 && position.x < Width) && (position.y >= 0 && position.y < Height);
 
     #region reusable code
 
+    private void ApplyToAllCells(Action<Cell> action)
+    {
+        for(int row = 0; row < Height; row++)
+        {
+            for(int column = 0; column < Width; column++)
+            {
+                action(GridArray[column, row]);
+            }
+        }
+    }
+
+    public bool IsWithinBoundaries(Vector2Int position) => (position.x >= 0 && position.x < Width) && (position.y >= 0 && position.y < Height);
+    
     // Возвращает клетку и её позицию
     private List<(Cell, Vector2Int)> GetListOfUnoccupiedCells()
     {
         var resultList = new List<(Cell, Vector2Int)>();
-        for(var row = 0; row < Height; row++)
+        ApplyToAllCells(cell => 
         {
-            for(var column = 0; column < Width; column++)
+            var currCell = cell;
+            if(!currCell.IsOccupied)
             {
-                var currCell = GridArray[column, row];
-                if(!currCell.IsOccupied)
-                {
-                    resultList.Add((currCell, new Vector2Int(column, row)));
-                }
+                resultList.Add((currCell, new Vector2Int(cell.Position.x, cell.Position.y)));
             }
-        }
+        });
+        
         return resultList;
     }
 

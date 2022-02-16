@@ -932,10 +932,25 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 981775217}
+        m_TargetAssemblyTypeName: PlayerControllerScript, Assembly-CSharp
+        m_MethodName: DetachPlayer
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  ToggleAIs:
+    m_PersistentCalls:
+      m_Calls: []
   Width: 17
   Height: 9
   BushCount: 10
-  EnemyCount: 0
+  EnemyCount: 5
   PlayerSpawnPoint: {x: 0, y: 0}
 --- !u!1 &981775216
 GameObject:
@@ -1836,6 +1851,33 @@ MonoBehaviour:
       - m_Target: {fileID: 926289740}
         m_TargetAssemblyTypeName: Grid, Assembly-CSharp
         m_MethodName: Initialize
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  GameFinished:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 926289740}
+        m_TargetAssemblyTypeName: Grid, Assembly-CSharp
+        m_MethodName: Cleanup
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 981775217}
+        m_TargetAssemblyTypeName: PlayerControllerScript, Assembly-CSharp
+        m_MethodName: DetachPlayer
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

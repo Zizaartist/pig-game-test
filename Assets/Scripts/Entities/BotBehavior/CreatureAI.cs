@@ -11,10 +11,12 @@ public abstract class CreatureAI : MonoBehaviour
     [SerializeField]
     public Creature body;
 
+    public bool IsActive { get; set; } = false;
+
     void Update()
     {
         // возможно лучше было бы использовать событие о готовности чем теребить флаг CanMove каждый фрэйм, но не смертельно
-        if(body?.CanMove ?? false)
+        if(IsActive && (body?.CanMove ?? false))
         {
             DecideNextMove();
             if(IntendedMovementDirection != null)

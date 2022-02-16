@@ -32,6 +32,8 @@ public class PlayerControllerScript : MonoBehaviour
         }
     }
 
+    public void DetachPlayer() => CurrentPlayer = null;
+
     public void OnMove()
     {
         var stickPos = input.actions.FindAction("Move").ReadValue<Vector2>();

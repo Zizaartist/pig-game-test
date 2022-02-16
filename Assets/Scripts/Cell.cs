@@ -42,15 +42,10 @@ public class Cell
         IsOccupied = false; // Во всех сценариях становится false
     }
 
-    public void Clear() 
+    public void Clear()
     {
         if(storedObjects.Any()) Debug.Log($"Pos: {Position}; objs: {storedObjects.Count()}");
-        //storedObjects.ForEach(wo => wo.Remove());
-        foreach (var wo in storedObjects)
-        {
-            wo.Remove();
-        }
-        storedObjects.Clear();
+        storedObjects.ToList().ForEach(wo => wo.Remove());
         IsOccupied = false;
     }
 
@@ -68,7 +63,7 @@ public class Cell
         storedObjects.ForEach(wo => wo.cell = null);
     }
 
-    public bool IsOccupied { get; private set; } = true;
+    public bool IsOccupied { get; private set; } = false;
     public bool CanWalk => IsOccupied;
     public int SortId { get; }
     public Vector2Int Position { get; }

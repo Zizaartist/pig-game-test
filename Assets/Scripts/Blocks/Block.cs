@@ -16,7 +16,7 @@ public abstract class Block : MonoBehaviour, IWorldObject
     {
         cell.Remove(this);
         Debug.Log($"Destroyed - {this.GetType()}");
-        //Destroy(gameObject);
+        Destroy(gameObject);
     }
 
     public void Sort(int id) => this.gameObject.GetComponent<SpriteRenderer>().sortingOrder = id;
